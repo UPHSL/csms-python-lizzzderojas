@@ -5,16 +5,16 @@ Complete this file during Sprint 0.
 ## Student Information
 
 **Full Name:**  
-`Enter your full name`
+`Liz Samantha V. De Rojas`
 
 **Student Number:**  
-`Enter your student number`
+`21-0803-106`
 
 **Section:**  
-`Enter your section`
+`J4A`
 
 **GitHub Username:**  
-`Enter your GitHub username`
+`lizzzderojas`
 
 **Primary Technology Stack:**  
 Python with Flask
@@ -37,10 +37,10 @@ What do you want to learn or improve during this course?
 `Enter your operating system`
 
 **Python Version:**  
-`Enter the output of python --version`
+`Python 3.13.2`
 
 **VS Code Installed:**  
-`Yes or No`
+`Yes`
 
 ## Academic Integrity Confirmation
 
