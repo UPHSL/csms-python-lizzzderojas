@@ -169,3 +169,257 @@ def test_multiple_residents_are_stored_separately(tmp_path):
     assert found_one.first_name == "Peter"
     assert found_two.first_name == "Michelle Jones"
     assert found_one.id != found_two.id
+
+def test_find_all_returns_all_residents(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    resident_two = Resident(
+        "Ana",
+        "Garcia",
+        "Laguna",
+        "09181234567",
+        "ana@example.com",
+        "Active",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+
+    residents = repository.find_all()
+
+    assert len(residents) == 2
+
+
+def test_find_all_returns_empty_list_when_no_residents(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    residents = repository.find_all()
+
+    assert residents == []
+
+def test_find_all_orders_residents_correctly(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    resident_two = Resident(
+        "Ana",
+        "Garcia",
+        "Laguna",
+        "09181234567",
+        "ana@example.com",
+        "Active",
+    )
+
+    resident_three = Resident(
+        "Maria",
+        "Dela Cruz",
+        "Cavite",
+        "09191234567",
+        "maria@example.com",
+        "Active",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+    repository.save(resident_three)
+
+    residents = repository.find_all()
+
+    assert residents[0].last_name == "Dela Cruz"
+    assert residents[0].first_name == "Juan"
+
+    assert residents[1].last_name == "Dela Cruz"
+    assert residents[1].first_name == "Maria"
+
+    assert residents[2].last_name == "Garcia"
+    assert residents[2].first_name == "Ana"
+
+    def search(self, query):
+        """Search Residents by first name or last name."""
+        connection = self.get_connection()
+
+        search_text = f"%{query.strip()}%"
+
+        cursor = connection.execute(
+            """
+            SELECT
+                id,
+                first_name,
+                last_name,
+                address,
+                contact_number,
+                email,
+                status
+            FROM residents
+            WHERE LOWER(first_name) LIKE LOWER(?)
+               OR LOWER(last_name) LIKE LOWER(?)
+            ORDER BY last_name ASC, first_name ASC, id ASC
+            """,
+            (search_text, search_text),
+        )
+
+        rows = cursor.fetchall()
+
+        connection.close()
+
+        residents = []
+
+        for row in rows:
+            resident = Resident(
+                first_name=row[1],
+                last_name=row[2],
+                address=row[3],
+                contact_number=row[4],
+                email=row[5],
+                status=row[6],
+                id=row[0],
+            )
+
+            residents.append(resident)
+
+        return residents
+
+def test_search_by_first_name_is_case_insensitive_and_partial(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Jonathan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "jonathan@example.com",
+        "Active",
+    )
+
+    repository.save(resident)
+
+    residents = repository.search("jon")
+
+    assert len(residents) == 1
+    assert residents[0].first_name == "Jonathan"
+
+def test_search_is_case_insensitive(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Jonathan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "jonathan@example.com",
+        "Active",
+    )
+
+    repository.save(resident)
+
+    residents = repository.search("JON")
+
+    assert len(residents) == 1
+    assert residents[0].first_name == "Jonathan"
+
+def test_search_by_last_name_is_case_insensitive_and_partial(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    repository.save(resident)
+
+    residents = repository.search("DELA")
+
+    assert len(residents) == 1
+    assert residents[0].last_name == "Dela Cruz"
+def test_search_returns_empty_list_when_no_resident_matches(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    repository.save(resident)
+
+    residents = repository.search("Zzz")
+
+    assert residents == []
+
+def test_search_returns_matching_residents_without_duplicates(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    resident_two = Resident(
+        "Juan",
+        "Garcia",
+        "Laguna",
+        "09181234567",
+        "juan2@example.com",
+        "Inactive",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+
+    residents = repository.search("Juan")
+
+    assert len(residents) == 2
+    assert residents[0].id != residents[1].id
+
+def test_search_preserves_all_resident_information(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+        "Inactive",
+    )
+
+    repository.save(resident)
+
+    residents = repository.search("Juan")
+
+    assert len(residents) == 1
+    assert residents[0].id == resident.id
+    assert residents[0].first_name == "Juan"
+    assert residents[0].last_name == "Dela Cruz"
+    assert residents[0].address == "Brgy. Mamplasan, Binan, Laguna"
+    assert residents[0].contact_number == "09171234567"
+    assert residents[0].email == "juan@example.com"
+    assert residents[0].status == "Inactive"
