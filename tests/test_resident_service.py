@@ -161,3 +161,55 @@ def test_validation_failure_is_identified(tmp_path):
 
     assert registered is None
     assert "first_name" in errors
+
+def test_search_with_blank_query_returns_all_residents(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+    )
+
+    resident_two = Resident(
+        "Ana",
+        "Garcia",
+        "Laguna",
+        "09181234567",
+        "ana@example.com",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+
+    residents = service.search("")
+
+    assert len(residents) == 2
+
+def test_search_with_whitespace_query_returns_all_residents(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Manila",
+        "09171234567",
+        "juan@example.com",
+    )
+
+    resident_two = Resident(
+        "Ana",
+        "Garcia",
+        "Laguna",
+        "09181234567",
+        "ana@example.com",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+
+    residents = service.search("   ")
+
+    assert len(residents) == 2

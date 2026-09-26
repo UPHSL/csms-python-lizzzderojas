@@ -91,3 +91,85 @@ class ResidentRepository:
         )
 
         return resident
+
+    def find_all(self):
+        """Find all Residents in the required order."""
+        connection = self.get_connection()
+
+
+        cursor = connection.execute(
+            """
+            SELECT
+                id,
+                first_name,
+                last_name,
+                address,
+                contact_number,
+                email,
+                status
+            FROM residents
+            ORDER BY last_name ASC, first_name ASC, id ASC
+            """
+        )
+
+        rows = cursor.fetchall()
+        connection.close()
+
+        residents = []
+
+        for row in rows:
+            resident = Resident(
+                first_name=row[1],
+                last_name=row[2],
+                address=row[3],
+                contact_number=row[4],
+                email=row[5],
+                status=row[6],
+                id=row[0],
+            )
+            residents.append(resident)
+
+        return residents
+
+    def search(self, query):
+        """Search Residents by first name or last name."""
+        connection = self.get_connection()
+
+        search_text = f"%{query.strip()}%"
+
+        cursor = connection.execute(
+            """
+            SELECT
+                id,
+                first_name,
+                last_name,
+                address,
+                contact_number,
+                email,
+                status
+            FROM residents
+            WHERE LOWER(first_name) LIKE LOWER(?)
+               OR LOWER(last_name) LIKE LOWER(?)
+            ORDER BY last_name ASC, first_name ASC, id ASC
+            """,
+            (search_text, search_text),
+        )
+
+        rows = cursor.fetchall()
+        connection.close()
+
+        residents = []
+
+        for row in rows:
+            resident = Resident(
+                first_name=row[1],
+                last_name=row[2],
+                address=row[3],
+                contact_number=row[4],
+                email=row[5],
+                status=row[6],
+                id=row[0],
+            )
+            residents.append(resident)
+
+        return residents

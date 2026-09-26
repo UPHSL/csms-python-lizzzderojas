@@ -18,3 +18,10 @@ class ResidentService:
         registered_resident = self.repository.save(resident)
 
         return registered_resident, []
+
+    def search(self, query):
+        """Search Residents or return all Residents for a blank query."""
+        if not query.strip():
+            return self.repository.find_all()
+
+        return self.repository.search(query)
