@@ -207,3 +207,28 @@ class ResidentRepository:
             return None
 
         return resident
+    
+    def deactivate_by_id(self, resident_id):
+        """Set an existing Resident's status to Inactive."""
+        connection = self.get_connection()
+
+        cursor = connection.execute(
+            """
+            UPDATE residents
+            SET status = ?
+            WHERE id = ?
+            """,
+            (
+                "Inactive",
+                resident_id,
+            ),
+        )
+
+        connection.commit()
+
+        connection.close()
+
+        if cursor.rowcount == 0:
+            return None
+
+        return self.find_by_id(resident_id)

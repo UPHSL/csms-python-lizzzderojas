@@ -423,3 +423,28 @@ def test_search_preserves_all_resident_information(tmp_path):
     assert residents[0].contact_number == "09171234567"
     assert residents[0].email == "juan@example.com"
     assert residents[0].status == "Inactive"
+
+def test_deactivate_resident_sets_status_to_inactive(tmp_path):
+    repository = create_test_repository(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+        "Active",
+    )
+
+    repository.save(resident)
+
+    deactivated = repository.deactivate_by_id(resident.id)
+
+    assert deactivated is not None
+    assert deactivated.id == resident.id
+    assert deactivated.status == "Inactive"
+
+    saved_resident = repository.find_by_id(resident.id)
+
+    assert saved_resident is not None
+    assert saved_resident.status == "Inactive"
