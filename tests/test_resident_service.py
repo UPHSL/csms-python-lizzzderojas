@@ -476,3 +476,144 @@ def test_updated_contact_number_preserves_leading_zero(tmp_path):
     assert errors == []
     assert saved_resident.contact_number == "09987654321"
     assert saved_resident.contact_number.startswith("0")
+
+def test_deactivate_active_resident_succeeds(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+    )
+    repository.save(resident)
+
+    deactivated, errors = service.deactivate(resident.id)
+
+    assert errors == []
+    assert deactivated is not None
+    assert deactivated.id == resident.id
+    assert deactivated.status == "Inactive"
+
+
+def test_deactivate_persists_inactive_status(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+    )
+    repository.save(resident)
+
+    deactivated, errors = service.deactivate(resident.id)
+
+    saved_resident = repository.find_by_id(resident.id)
+
+    assert errors == []
+    assert deactivated is not None
+    assert saved_resident.status == "Inactive"
+
+
+def test_deactivate_preserves_resident_information(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+    )
+    repository.save(resident)
+
+    original_id = resident.id
+
+    deactivated, errors = service.deactivate(original_id)
+
+    saved_resident = repository.find_by_id(original_id)
+
+    assert errors == []
+    assert saved_resident.id == original_id
+    assert saved_resident.first_name == "Juan"
+    assert saved_resident.last_name == "Dela Cruz"
+    assert saved_resident.address == "Brgy. Mamplasan, Binan, Laguna"
+    assert saved_resident.contact_number == "09171234567"
+    assert saved_resident.email == "juan@example.com"
+    assert saved_resident.status == "Inactive"
+
+def test_deactivate_already_inactive_resident_is_safe(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+        "Inactive",
+    )
+    repository.save(resident)
+
+    deactivated, errors = service.deactivate(resident.id)
+
+    assert errors == []
+    assert deactivated is not None
+    assert deactivated.id == resident.id
+    assert deactivated.status == "Inactive"
+
+
+def test_deactivate_nonexistent_resident_returns_not_found(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    deactivated, errors = service.deactivate(9999)
+
+    assert deactivated is None
+    assert errors == ["not_found"]
+
+
+def test_deactivate_nonexistent_resident_does_not_create_record(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    before = repository.find_all()
+
+    deactivated, errors = service.deactivate(9999)
+
+    after = repository.find_all()
+
+    assert deactivated is None
+    assert errors == ["not_found"]
+    assert len(after) == len(before)
+
+def test_deactivate_one_resident_does_not_affect_another(tmp_path):
+    service, repository = create_service(tmp_path)
+
+    resident_one = Resident(
+        "Juan",
+        "Dela Cruz",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09171234567",
+        "juan@example.com",
+    )
+
+    resident_two = Resident(
+        "Maria",
+        "Santos",
+        "Brgy. Mamplasan, Binan, Laguna",
+        "09181234567",
+        "maria@example.com",
+    )
+
+    repository.save(resident_one)
+    repository.save(resident_two)
+
+    deactivated, errors = service.deactivate(resident_one.id)
+
+    remaining_resident = repository.find_by_id(resident_two.id)
+
+    assert errors == []
+    assert deactivated.status == "Inactive"
+    assert remaining_resident.status == "Active"

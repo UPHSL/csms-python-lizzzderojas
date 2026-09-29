@@ -47,3 +47,17 @@ class ResidentService:
         updated_resident = self.repository.update(resident)
 
         return updated_resident, []
+    
+    def deactivate(self, resident_id):
+        """Deactivate an existing Resident."""
+        resident = self.repository.find_by_id(resident_id)
+
+        if resident is None:
+            return None, ["not_found"]
+
+        if resident.status == "Inactive":
+            return resident, []
+
+        deactivated_resident = self.repository.deactivate_by_id(resident_id)
+
+        return deactivated_resident, []
