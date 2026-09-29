@@ -25,3 +25,25 @@ class ResidentService:
             return self.repository.find_all()
 
         return self.repository.search(query)
+    
+    def update(self, resident_id, first_name, last_name, address, contact_number, email):
+        """Update an existing Resident."""
+        resident = self.repository.find_by_id(resident_id)
+
+        if resident is None:
+            return None, ["not_found"]
+
+        resident.first_name = first_name
+        resident.last_name = last_name
+        resident.address = address
+        resident.contact_number = contact_number
+        resident.email = email
+
+        errors = self.validator.validate(resident)
+
+        if errors:
+            return None, errors
+
+        updated_resident = self.repository.update(resident)
+
+        return updated_resident, []

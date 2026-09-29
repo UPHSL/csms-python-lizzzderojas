@@ -173,3 +173,37 @@ class ResidentRepository:
             residents.append(resident)
 
         return residents
+    
+    def update(self, resident):
+        """Update an existing Resident by ID."""
+        connection = self.get_connection()
+
+        cursor = connection.execute(
+            """
+            UPDATE residents
+            SET
+                first_name = ?,
+                last_name = ?,
+                address = ?,
+                contact_number = ?,
+                email = ?
+            WHERE id = ?
+            """,
+            (
+                resident.first_name,
+                resident.last_name,
+                resident.address,
+                resident.contact_number,
+                resident.email,
+                resident.id,
+            ),
+        )
+
+        connection.commit()
+
+        connection.close()
+
+        if cursor.rowcount == 0:
+            return None
+
+        return resident
