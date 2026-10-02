@@ -13,7 +13,7 @@ def get_connection(database_file=DATABASE_FILE):
 
 
 def initialize_database(database_file=DATABASE_FILE):
-    """Create the Resident table if it does not already exist."""
+    """Create the database tables if they do not already exist."""
     connection = get_connection(database_file)
 
     connection.execute("""
@@ -25,6 +25,17 @@ def initialize_database(database_file=DATABASE_FILE):
             contact_number TEXT NOT NULL,
             email TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'Active'
+        )
+    """)
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS service_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            resident_id INTEGER NOT NULL,
+            service_type TEXT NOT NULL,
+            description TEXT NOT NULL,
+            date_requested TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Pending'
         )
     """)
 
