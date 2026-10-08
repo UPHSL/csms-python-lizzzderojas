@@ -87,3 +87,20 @@ class ServiceRequestRepository:
         )
 
         return service_request
+
+    def update_status(self, service_request_id, status):
+        """Update only the status of an existing ServiceRequest."""
+        connection = self.get_connection()
+
+        connection.execute(
+            """
+            UPDATE service_requests
+            SET status = ?
+            WHERE id = ?
+            """,
+            (status, service_request_id),
+        )
+
+        connection.commit()
+
+        connection.close()
