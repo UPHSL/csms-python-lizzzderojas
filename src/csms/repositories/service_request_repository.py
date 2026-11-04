@@ -88,6 +88,87 @@ class ServiceRequestRepository:
 
         return service_request
 
+    def _map_row(self, row):
+        """Convert a database row into a ServiceRequest object."""
+        return ServiceRequest(
+            resident_id=row[1],
+            service_type=row[2],
+            description=row[3],
+            date_requested=row[4],
+            status=row[5],
+            id=row[0],
+        )
+
+    def _fetch_requests(self, query, parameters=()):
+        """Execute a SELECT query and return ServiceRequest objects."""
+        connection = self.get_connection()
+
+        try:
+            rows = connection.execute(query, parameters).fetchall()
+        finally:
+            connection.close()
+
+        return [self._map_row(row) for row in rows]
+
+    def find_all(self):
+        """Find all ServiceRequests in deterministic order."""
+        return self._fetch_requests(
+            """
+            SELECT id, resident_id, service_type, description,
+                   date_requested, status
+            FROM service_requests
+            ORDER BY date_requested DESC, id DESC
+            """
+        )
+
+    def search(self, query):
+        """Search service type or description using partial text."""
+        search_text = f"%{query.strip()}%"
+
+        return self._fetch_requests(
+            """
+            SELECT id, resident_id, service_type, description,
+                   date_requested, status
+            FROM service_requests
+            WHERE LOWER(service_type) LIKE LOWER(?)
+               OR LOWER(description) LIKE LOWER(?)
+            ORDER BY date_requested DESC, id DESC
+            """,
+            (search_text, search_text),
+        )
+
+    def find_by_status(self, status):
+        """Find ServiceRequests with an exact status."""
+        return self._fetch_requests(
+            """
+            SELECT id, resident_id, service_type, description,
+                   date_requested, status
+            FROM service_requests
+            WHERE status = ?
+            ORDER BY date_requested DESC, id DESC
+            """,
+            (status,),
+        )
+
+    def search_by_text_and_status(self, query, status):
+        """Search text and status together."""
+        search_text = f"%{query.strip()}%"
+
+        return self._fetch_requests(
+            """
+            SELECT id, resident_id, service_type, description,
+                   date_requested, status
+            FROM service_requests
+            WHERE (
+                LOWER(service_type) LIKE LOWER(?)
+                OR LOWER(description) LIKE LOWER(?)
+            )
+            AND status = ?
+            ORDER BY date_requested DESC, id DESC
+            """,
+            (search_text, search_text, status),
+        )
+
     def update_status(self, service_request_id, status):
         """Update only the status of an existing ServiceRequest."""
         connection = self.get_connection()
