@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSMS Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page-container">
+        <header class="page-header">
+            <div>
+                <p>Community Services Management System</p>
+                <h1>Dashboard</h1>
+                <p class="subtitle">
+                    Overview of Residents and Service Requests.
+                </p>
+            </div>
+
+            <nav class="main-navigation" aria-label="Main navigation">
+                <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('main.resident_list') }}">Residents</a>
+                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
+            </nav>
+        </header>
+
+        <section class="dashboard-section">
+            <h2>Resident Summary</h2>
+
+            <div class="dashboard-grid">
+                <article class="dashboard-card">
+                    <h3>Total Residents</h3>
+                    <p class="dashboard-number">{{ resident_stats.total }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Active Residents</h3>
+                    <p class="dashboard-number">{{ resident_stats.active }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Inactive Residents</h3>
+                    <p class="dashboard-number">{{ resident_stats.inactive }}</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Service Request Summary</h2>
+
+            <div class="dashboard-grid">
+                <article class="dashboard-card">
+                    <h3>Total Service Requests</h3>
+                    <p class="dashboard-number">{{ service_request_stats.total }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Pending</h3>
+                    <p class="dashboard-number">{{ service_request_stats.pending }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>In Progress</h3>
+                    <p class="dashboard-number">{{ service_request_stats.in_progress }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Completed</h3>
+                    <p class="dashboard-number">{{ service_request_stats.completed }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Cancelled</h3>
+                    <p class="dashboard-number">{{ service_request_stats.cancelled }}</p>
+                </article>
+
+                <article class="dashboard-card">
+                    <h3>Open Service Requests</h3>
+                    <p class="dashboard-number">{{ service_request_stats.open }}</p>
+                    <p class="card-description">Pending + In Progress</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-heading">
+                <h2>Recent Service Requests</h2>
+                <a href="{{ url_for('main.service_requests') }}">
+                    View All
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Resident ID</th>
+                            <th>Service Type</th>
+                            <th>Date Requested</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for service_request in recent_requests %}
+                        <tr>
+                            <td>{{ service_request.id }}</td>
+                            <td>{{ service_request.resident_id }}</td>
+                            <td>{{ service_request.service_type }}</td>
+                            <td>{{ service_request.date_requested }}</td>
+                            <td>{{ service_request.status }}</td>
+                            <td>
+                                <a href="{{ url_for(
+                                    'main.service_request_detail',
+                                    service_request_id=service_request.id
+                                ) }}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                No Service Requests available.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

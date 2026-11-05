@@ -232,3 +232,31 @@ class ResidentRepository:
             return None
 
         return self.find_by_id(resident_id)
+    def count_all_residents(self):
+        """Count all persisted Residents."""
+        connection = self.get_connection()
+
+        try:
+            cursor = connection.execute(
+                "SELECT COUNT(*) FROM residents"
+            )
+            return cursor.fetchone()[0]
+        finally:
+            connection.close()
+
+    def count_residents_by_status(self, status):
+        """Count Residents with the specified status."""
+        connection = self.get_connection()
+
+        try:
+            cursor = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM residents
+                WHERE status = ?
+                """,
+                (status,),
+            )
+            return cursor.fetchone()[0]
+        finally:
+            connection.close()

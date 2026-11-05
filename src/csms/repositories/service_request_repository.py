@@ -185,3 +185,44 @@ class ServiceRequestRepository:
         connection.commit()
 
         connection.close()
+    def count_all_service_requests(self):
+        """Count all persisted Service Requests."""
+        connection = self.get_connection()
+
+        try:
+            cursor = connection.execute(
+                "SELECT COUNT(*) FROM service_requests"
+            )
+            return cursor.fetchone()[0]
+        finally:
+            connection.close()
+
+    def count_service_requests_by_status(self, status):
+        """Count Service Requests with the specified status."""
+        connection = self.get_connection()
+
+        try:
+            cursor = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM service_requests
+                WHERE status = ?
+                """,
+                (status,),
+            )
+            return cursor.fetchone()[0]
+        finally:
+            connection.close()
+
+    def find_recent_service_requests(self, limit=5):
+        """Find recent Service Requests using the required ordering."""
+        return self._fetch_requests(
+            """
+            SELECT id, resident_id, service_type, description,
+                   date_requested, status
+            FROM service_requests
+            ORDER BY date_requested DESC, id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        )
