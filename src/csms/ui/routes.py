@@ -28,6 +28,7 @@ from csms.services.request_service import (
 from csms.services.service_request_query_service import (
     ServiceRequestQueryService,
 )
+from csms.services.dashboard_service import DashboardService
 
 main_blueprint = Blueprint("main", __name__)
 
@@ -77,6 +78,15 @@ def index() -> str:
         current_sprint=current_app.config["CURRENT_SPRINT"],
     )
 
+@main_blueprint.get("/dashboard")
+def dashboard():
+    """Display dashboard summaries and recent Service Requests."""
+    dashboard_data = get_dashboard_service().get_dashboard_data()
+
+    return render_template(
+        "dashboard.html",
+        **dashboard_data,
+    )
 
 @main_blueprint.get("/health")
 def health():
@@ -364,4 +374,17 @@ def update_service_request_status(service_request_id):
             "main.service_request_detail",
             service_request_id=service_request_id,
         )
+    )
+
+def get_dashboard_service():
+    """Create the Dashboard service for the application database."""
+    database_file = current_app.config.get("DATABASE")
+
+    return DashboardService(
+        resident_repository=ResidentRepository(
+            database_file=database_file
+        ),
+        service_request_repository=ServiceRequestRepository(
+            database_file=database_file
+        ),
     )
