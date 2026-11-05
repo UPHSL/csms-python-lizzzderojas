@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page-container form-container">
+        <header class="page-header">
+            <div>
+                <p class="label">Community Services Management System</p>
+                <h1>{{ title }}</h1>
+                <p class="subtitle">
+                    {% if is_edit %}
+                        Update the resident's information.
+                    {% else %}
+                        Enter the information to register a new resident.
+                    {% endif %}
+                </p>
+            </div>
+        </header>
+
+        <section class="card">
+            {% if errors %}
+                <div class="alert error">
+                    <strong>Please correct the following fields:</strong>
+                    <ul>
+                        {% for error in errors %}
+                            <li>
+                                {% if error == "first_name" %}
+                                    First name is required.
+                                {% elif error == "last_name" %}
+                                    Last name is required.
+                                {% elif error == "address" %}
+                                    Address is required.
+                                {% elif error == "contact_number" %}
+                                    Enter a valid 11-digit mobile number starting with 09.
+                                {% elif error == "email" %}
+                                    Enter a valid email address.
+                                {% elif error == "status" %}
+                                    Invalid resident status.
+                                {% else %}
+                                    {{ error }}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{{ form_action }}">
+                {% if is_edit %}
+                    <div class="form-group">
+                        <label for="resident_id">Resident ID</label>
+                        <input
+                            type="text"
+                            id="resident_id"
+                            value="{{ resident.id }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <input
+                            type="text"
+                            id="status"
+                            value="{{ resident.status }}"
+                            readonly
+                        >
+                    </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            value="{{ resident.first_name }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            value="{{ resident.last_name }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="address">Address</label>
+                        <textarea
+                            id="address"
+                            name="address"
+                            rows="3"
+                            required
+                        >{{ resident.address }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact_number">Contact Number</label>
+                        <input
+                            type="tel"
+                            id="contact_number"
+                            name="contact_number"
+                            value="{{ resident.contact_number }}"
+                            placeholder="09XXXXXXXXX"
+                            maxlength="11"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ resident.email }}"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="button primary">
+                        {% if is_edit %}
+                            Save Changes
+                        {% else %}
+                            Register Resident
+                        {% endif %}
+                    </button>
+
+                    <a class="button secondary" href="{{ url_for('main.resident_list') }}">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
