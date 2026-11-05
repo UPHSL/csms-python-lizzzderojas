@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Request Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page-container">
+        <header class="page-header">
+            <p>Community Services Management System</p>
+            <h1>Service Request Management</h1>
+            <p>View, search, and manage submitted service requests.</p>
+
+            <nav>
+                <a href="{{ url_for('main.index') }}">Home</a> |
+                <a href="{{ url_for('main.resident_list') }}">Residents</a> |
+                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
+            </nav>
+
+            <a class="button" href="{{ url_for('main.new_service_request') }}">
+                New Service Request
+            </a>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="card">
+            <h2>Service Requests</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Resident ID</th>
+                            <th>Service Type</th>
+                            <th>Date Requested</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if service_requests %}
+                            {% for service_request in service_requests %}
+                                <tr>
+                                    <td>{{ service_request.id }}</td>
+                                    <td>{{ service_request.resident_id }}</td>
+                                    <td>{{ service_request.service_type }}</td>
+                                    <td>{{ service_request.date_requested }}</td>
+                                    <td>{{ service_request.status }}</td>
+                                    <td>
+                                        <a href="{{ url_for('main.service_request_detail', service_request_id=service_request.id) }}">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6">No Service Requests found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -335,3 +335,29 @@ th {
         gap: 8px;
     }
 }
+
+/* Service Request Form Errors */
+
+.error-message {
+    margin-top: 5px;
+    color: #991b1b;
+    font-size: 14px;
+}
+
+/* Service Request Navigation */
+
+.page-header nav {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+}
+
+.page-header nav a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.page-header nav a:hover {
+    text-decoration: underline;
+}
