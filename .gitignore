@@ -34,3 +34,6 @@ instance/
 
 # Logs
 *.log
+
+#SQLite database files
+*.db

@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Service Request</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <main class="page-container">
+        <header class="page-header">
+            <p>Community Services Management System</p>
+            <h1>New Service Request</h1>
+            <p>Submit a service request for an existing active resident.</p>
+
+            <nav>
+                <a href="{{ url_for('main.index') }}">Home</a> |
+                <a href="{{ url_for('main.resident_list') }}">Residents</a> |
+                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
+            </nav>
+        </header>
+
+        <section class="form-container">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="resident_id">Resident ID</label>
+                    <input
+                        type="number"
+                        id="resident_id"
+                        name="resident_id"
+                        min="1"
+                        value="{{ values.get('resident_id', '') }}"
+                        required
+                    >
+                    {% if errors.get('resident_id') %}
+                        <p class="error-message">{{ errors.get('resident_id') }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="service_type">Service Type</label>
+                    <input
+                        type="text"
+                        id="service_type"
+                        name="service_type"
+                        value="{{ values.get('service_type', '') }}"
+                        required
+                    >
+                    {% if errors.get('service_type') %}
+                        <p class="error-message">{{ errors.get('service_type') }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        required
+                    >{{ values.get('description', '') }}</textarea>
+                    {% if errors.get('description') %}
+                        <p class="error-message">{{ errors.get('description') }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="date_requested">Date Requested</label>
+                    <input
+                        type="date"
+                        id="date_requested"
+                        name="date_requested"
+                        value="{{ values.get('date_requested', '') }}"
+                        required
+                    >
+                    {% if errors.get('date_requested') %}
+                        <p class="error-message">{{ errors.get('date_requested') }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="button">
+                        Submit Service Request
+                    </button>
+                    <a href="{{ url_for('main.service_requests') }}" class="button secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
