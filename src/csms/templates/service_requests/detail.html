@@ -1,121 +1,94 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Request Details</title>
+    <title>Service Request #{{ service_request.id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <main class="page-container">
-        <header class="page-header">
-            <p>Community Services Management System</p>
-            <h1>Service Request Details</h1>
-            <p>View the information and current status of this request.</p>
+    <main class="page-container page-narrow service-request-page">
+        <header class="service-request-header">
+            <div class="service-request-heading">
+                <p class="label">Community Services Management System</p>
+                <h1>Service Request Details</h1>
+                <p class="subtitle">Review this request and update its status.</p>
+            </div>
 
-            <nav>
-                <a href="{{ url_for('main.index') }}">Home</a> |
-                <a href="{{ url_for('main.resident_list') }}">Residents</a> |
-                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
-            </nav>
+            <div class="service-request-header-actions">
+                <nav class="main-navigation" aria-label="Main navigation">
+                    <a href="{{ url_for('main.index') }}">Home</a>
+                    <a href="{{ url_for('main.resident_list') }}">Residents</a>
+                    <a href="{{ url_for('main.service_requests') }}" aria-current="page">Service Requests</a>
+                </nav>
+            </div>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
+                    <div class="alert {{ category }}" role="status">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <section class="form-container">
-            <h2>Request Information</h2>
-
-            <div class="form-group">
-                <strong>Request ID:</strong>
-                <p>{{ service_request.id }}</p>
+        <section class="card detail-card">
+            <div class="detail-heading">
+                <h2>Request #{{ service_request.id }}</h2>
+                <span class="status-badge status-{{ service_request.status|lower|replace(' ', '-') }}">
+                    {{ service_request.status }}
+                </span>
             </div>
 
-            <div class="form-group">
-                <strong>Resident ID:</strong>
-                <p>{{ service_request.resident_id }}</p>
-            </div>
+            <dl class="detail-grid">
+                <div>
+                    <dt>Resident ID</dt>
+                    <dd>{{ service_request.resident_id }}</dd>
+                </div>
 
-            <div class="form-group">
-                <strong>Service Type:</strong>
-                <p>{{ service_request.service_type }}</p>
-            </div>
+                <div>
+                    <dt>Date requested</dt>
+                    <dd>{{ service_request.date_requested }}</dd>
+                </div>
 
-            <div class="form-group">
-                <strong>Description:</strong>
-                <p>{{ service_request.description }}</p>
-            </div>
+                <div class="full-width">
+                    <dt>Service type</dt>
+                    <dd>{{ service_request.service_type }}</dd>
+                </div>
 
-            <div class="form-group">
-                <strong>Date Requested:</strong>
-                <p>{{ service_request.date_requested }}</p>
-            </div>
+                <div class="full-width">
+                    <dt>Description</dt>
+                    <dd class="description">{{ service_request.description }}</dd>
+                </div>
+            </dl>
 
-            <div class="form-group">
-                <strong>Current Status:</strong>
-                <p>
-                    <span class="status-badge">
-                        {{ service_request.status }}
-                    </span>
-                </p>
-            </div>
+            <div class="detail-actions">
+                {% set update_url = url_for('main.update_service_request_status', service_request_id=service_request.id) %}
 
-            <div class="form-actions">
                 {% if service_request.status == "Pending" %}
-                    <form method="POST" action="{{ url_for(
-                        'main.update_service_request_status',
-                        service_request_id=service_request.id
-                    ) }}">
+                    <form method="POST" action="{{ update_url }}">
                         <input type="hidden" name="status" value="In Progress">
-                        <button type="submit" class="button">
-                            Start Processing
-                        </button>
+                        <button type="submit" class="button primary">Start processing</button>
                     </form>
-
-                    <form method="POST" action="{{ url_for(
-                        'main.update_service_request_status',
-                        service_request_id=service_request.id
-                    ) }}">
-                        <input type="hidden" name="status" value="Cancelled">
-                        <button type="submit" class="button secondary">
-                            Cancel Request
-                        </button>
-                    </form>
-
                 {% elif service_request.status == "In Progress" %}
-                    <form method="POST" action="{{ url_for(
-                        'main.update_service_request_status',
-                        service_request_id=service_request.id
-                    ) }}">
+                    <form method="POST" action="{{ update_url }}">
                         <input type="hidden" name="status" value="Completed">
-                        <button type="submit" class="button">
-                            Complete Request
-                        </button>
+                        <button type="submit" class="button primary">Mark as completed</button>
                     </form>
-
-                    <form method="POST" action="{{ url_for(
-                        'main.update_service_request_status',
-                        service_request_id=service_request.id
-                    ) }}">
-                        <input type="hidden" name="status" value="Cancelled">
-                        <button type="submit" class="button secondary">
-                            Cancel Request
-                        </button>
-                    </form>
-
-                {% else %}
-                    <p>This request is in a terminal status. No further status actions are available.</p>
                 {% endif %}
 
-                <a href="{{ url_for('main.service_requests') }}" class="button secondary">
-                    Back to Service Requests
-                </a>
+                {% if service_request.status in ["Pending", "In Progress"] %}
+                    <form method="POST" action="{{ update_url }}"
+                          onsubmit="return confirm('Cancel this request? This cannot be undone.');">
+                        <input type="hidden" name="status" value="Cancelled">
+                        <button type="submit" class="button danger">Cancel request</button>
+                    </form>
+                {% else %}
+                    <p class="terminal-note">This request is {{ service_request.status|lower }}, so its status can no longer be changed.</p>
+                {% endif %}
+
+                <span class="spacer"></span>
+                <a href="{{ url_for('main.service_requests') }}" class="button secondary">Back to requests</a>
             </div>
         </section>
     </main>

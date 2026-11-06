@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,21 +8,27 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <main class="page-container">
-        <header class="page-header">
-            <p>Community Services Management System</p>
-            <h1>Service Request Management</h1>
-            <p>View, search, and manage submitted service requests.</p>
+    <main class="page-container service-request-page">
+        <header class="service-request-header">
+            <div class="service-request-heading">
+                <p class="label">Community Services Management System</p>
+                <h1>Service Request Management</h1>
+                <p class="subtitle">
+                    View, search, and manage submitted service requests.
+                </p>
+            </div>
 
-            <nav>
-                <a href="{{ url_for('main.index') }}">Home</a> |
-                <a href="{{ url_for('main.resident_list') }}">Residents</a> |
-                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
-            </nav>
+            <div class="service-request-header-actions">
+                <nav class="main-navigation" aria-label="Main navigation">
+                    <a href="{{ url_for('main.index') }}">Home</a>
+                    <a href="{{ url_for('main.resident_list') }}">Residents</a>
+                    <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
+                </nav>
 
-            <a class="button" href="{{ url_for('main.new_service_request') }}">
-                New Service Request
-            </a>
+                <a class="button primary" href="{{ url_for('main.new_service_request') }}">
+                    New Service Request
+                </a>
+            </div>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -32,8 +39,13 @@
             {% endif %}
         {% endwith %}
 
-        <section class="card">
-            <h2>Service Requests</h2>
+        <section class="card service-request-card">
+            <div class="section-heading">
+                <h2>Service Requests</h2>
+                <span class="record-count">
+                    {{ service_requests|length }} record(s)
+                </span>
+            </div>
 
             <div class="table-wrapper">
                 <table>
@@ -66,7 +78,9 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6">No Service Requests found.</td>
+                                <td colspan="6" class="empty-state">
+                                    No Service Requests found.
+                                </td>
                             </tr>
                         {% endif %}
                     </tbody>
