@@ -61,6 +61,7 @@ def get_request_repository(app):
 # LIST AND SEARCH TESTS
 
 
+
 def test_service_request_list_page_loads(client):
     response = client.get("/service-requests")
 
@@ -68,11 +69,13 @@ def test_service_request_list_page_loads(client):
     assert b"Service Request Management" in response.data
 
 
+
 def test_empty_service_request_list_displays_message(client):
     response = client.get("/service-requests")
 
     assert response.status_code == 200
     assert b"No Service Requests found." in response.data
+
 
 
 def test_service_request_list_displays_saved_request(client, app):
@@ -85,6 +88,7 @@ def test_service_request_list_displays_saved_request(client, app):
     assert b"Barangay Clearance" in response.data
 
 
+
 def test_service_request_list_displays_required_columns(client):
     response = client.get("/service-requests")
 
@@ -93,6 +97,7 @@ def test_service_request_list_displays_required_columns(client):
     assert b"Date Requested" in response.data
     assert b"Status" in response.data
     assert b"Actions" in response.data
+
 
 
 def test_service_request_list_uses_newest_first_order(client, app):
@@ -119,6 +124,7 @@ def test_service_request_list_uses_newest_first_order(client, app):
     )
 
 
+
 def test_service_request_search_finds_partial_service_type(client, app):
     resident = create_resident(app)
     create_request(app, resident.id)
@@ -127,6 +133,7 @@ def test_service_request_search_finds_partial_service_type(client, app):
 
     assert response.status_code == 200
     assert b"Barangay Clearance" in response.data
+
 
 
 def test_service_request_search_finds_description(client, app):
@@ -143,6 +150,7 @@ def test_service_request_search_finds_description(client, app):
     assert b"Barangay Clearance" in response.data
 
 
+
 def test_blank_search_displays_all_service_requests(client, app):
     resident = create_resident(app)
     create_request(app, resident.id, service_type="Clearance")
@@ -153,6 +161,7 @@ def test_blank_search_displays_all_service_requests(client, app):
     assert response.status_code == 200
     assert b"Clearance" in response.data
     assert b"Medical Assistance" in response.data
+
 
 
 def test_service_request_status_filter_displays_matching_records(
@@ -173,6 +182,7 @@ def test_service_request_status_filter_displays_matching_records(
     assert response.status_code == 200
     assert b"Completed Request" in response.data
     assert b"Barangay Clearance" not in response.data
+
 
 
 def test_service_request_search_and_status_filter_work_together(
@@ -203,6 +213,7 @@ def test_service_request_search_and_status_filter_work_together(
     assert b"Medical Assistance" not in response.data
 
 
+
 def test_invalid_service_request_status_filter_returns_400(client):
     response = client.get("/service-requests?status=Unknown")
 
@@ -212,11 +223,13 @@ def test_invalid_service_request_status_filter_returns_400(client):
 # SUBMISSION FORM TESTS
 
 
+
 def test_new_service_request_form_loads(client):
     response = client.get("/service-requests/new")
 
     assert response.status_code == 200
     assert b"New Service Request" in response.data
+
 
 
 def test_submission_form_does_not_expose_id_or_status_fields(client):
@@ -229,6 +242,7 @@ def test_submission_form_does_not_expose_id_or_status_fields(client):
     assert b'name="date_requested"' in response.data
     assert b'name="status"' not in response.data
     assert b'name="id"' not in response.data
+
 
 
 def test_valid_submission_creates_pending_request(client, app):
@@ -256,6 +270,7 @@ def test_valid_submission_creates_pending_request(client, app):
     assert requests[0].status == "Pending"
 
 
+
 def test_invalid_submission_preserves_values_and_does_not_save(
     client,
     app,
@@ -280,6 +295,7 @@ def test_invalid_submission_preserves_values_and_does_not_save(
     assert repository.find_all() == []
 
 
+
 def test_submission_rejects_invalid_resident_id(client, app):
     response = client.post(
         "/service-requests/new",
@@ -296,6 +312,7 @@ def test_submission_rejects_invalid_resident_id(client, app):
     assert get_request_repository(app).find_all() == []
 
 
+
 def test_submission_rejects_nonexistent_resident(client, app):
     response = client.post(
         "/service-requests/new",
@@ -310,6 +327,7 @@ def test_submission_rejects_nonexistent_resident(client, app):
     assert response.status_code == 400
     assert b"specified Resident does not exist" in response.data
     assert get_request_repository(app).find_all() == []
+
 
 
 def test_submission_rejects_inactive_resident(client, app):
@@ -333,6 +351,7 @@ def test_submission_rejects_inactive_resident(client, app):
 # DETAILS PAGE TESTS
 
 
+
 def test_service_request_details_page_displays_request(client, app):
     resident = create_resident(app)
     service_request = create_request(app, resident.id)
@@ -348,6 +367,7 @@ def test_service_request_details_page_displays_request(client, app):
     assert b"Pending" in response.data
 
 
+
 def test_unknown_service_request_details_returns_404(client):
     response = client.get("/service-requests/999999")
 
@@ -355,6 +375,7 @@ def test_unknown_service_request_details_returns_404(client):
 
 
 # STATUS WORKFLOW TESTS
+
 
 
 def test_pending_request_can_start_processing(client, app):
@@ -374,6 +395,7 @@ def test_pending_request_can_start_processing(client, app):
     assert saved_request.status == "In Progress"
 
 
+
 def test_pending_request_can_be_cancelled(client, app):
     resident = create_resident(app)
     service_request = create_request(app, resident.id)
@@ -389,6 +411,7 @@ def test_pending_request_can_be_cancelled(client, app):
         service_request.id
     )
     assert saved_request.status == "Cancelled"
+
 
 
 def test_in_progress_request_can_be_completed(client, app):
@@ -412,6 +435,7 @@ def test_in_progress_request_can_be_completed(client, app):
     assert saved_request.status == "Completed"
 
 
+
 def test_in_progress_request_can_be_cancelled(client, app):
     resident = create_resident(app)
     service_request = create_request(
@@ -431,6 +455,7 @@ def test_in_progress_request_can_be_cancelled(client, app):
         service_request.id
     )
     assert saved_request.status == "Cancelled"
+
 
 
 def test_invalid_status_transition_does_not_update_request(
@@ -455,6 +480,7 @@ def test_invalid_status_transition_does_not_update_request(
     assert saved_request.status == "Pending"
 
 
+
 def test_terminal_request_displays_no_status_action_buttons(
     client,
     app,
@@ -477,6 +503,7 @@ def test_terminal_request_displays_no_status_action_buttons(
     assert b"Cancel Request" not in response.data
 
 
+
 def test_status_update_route_does_not_allow_get(client, app):
     resident = create_resident(app)
     service_request = create_request(app, resident.id)
@@ -488,6 +515,7 @@ def test_status_update_route_does_not_allow_get(client, app):
     assert response.status_code == 405
 
 
+
 def test_status_update_for_unknown_request_returns_404(client):
     response = client.post(
         "/service-requests/999999/status",
@@ -495,6 +523,7 @@ def test_status_update_for_unknown_request_returns_404(client):
     )
 
     assert response.status_code == 404
+
 
 
 def test_status_update_preserves_other_request_information(
@@ -521,3 +550,189 @@ def test_status_update_preserves_other_request_information(
     assert saved_request.description == "Request for barangay clearance"
     assert saved_request.date_requested == "2026-10-01"
     assert saved_request.status == "In Progress"
+
+
+def test_submission_rejects_impossible_calendar_date_without_saving(
+    client,
+    app,
+):
+    resident = create_resident(app)
+
+    response = client.post(
+        "/service-requests/new",
+        data={
+            "resident_id": str(resident.id),
+            "service_type": "Medical Assistance",
+            "description": "Request for medical support",
+            "date_requested": "2026-02-30",
+        },
+    )
+
+    assert response.status_code == 400
+    assert b"Enter a valid date." in response.data
+    assert b"2026-02-30" in response.data
+
+    repository = get_request_repository(app)
+    assert repository.find_all() == []
+
+
+def test_rejected_submission_does_not_modify_existing_request(
+    client,
+    app,
+):
+    resident = create_resident(app)
+    existing_request = create_request(
+        app,
+        resident.id,
+        service_type="Barangay Clearance",
+        description="Original request description",
+        date_requested="2026-10-01",
+    )
+
+    response = client.post(
+        "/service-requests/new",
+        data={
+            "resident_id": str(resident.id),
+            "service_type": "",
+            "description": "Invalid new request",
+            "date_requested": "2026-11-11",
+        },
+    )
+
+    assert response.status_code == 400
+
+    repository = get_request_repository(app)
+    saved_request = repository.find_by_id(existing_request.id)
+    all_requests = repository.find_all()
+
+    assert saved_request is not None
+    assert saved_request.service_type == "Barangay Clearance"
+    assert saved_request.description == "Original request description"
+    assert saved_request.date_requested == "2026-10-01"
+    assert saved_request.status == "Pending"
+    assert len(all_requests) == 1
+
+
+def test_repeated_read_only_requests_do_not_modify_persisted_data(
+    client,
+    app,
+):
+    resident = create_resident(app)
+    service_request = create_request(
+        app,
+        resident.id,
+        service_type="Medical Assistance",
+        description="Request for medical support",
+    )
+
+    repository = get_request_repository(app)
+
+    requests_before = repository.find_all()
+
+    responses = [
+        client.get("/service-requests"),
+        client.get("/service-requests?q=Medical"),
+        client.get(f"/service-requests/{service_request.id}"),
+        client.get("/service-requests"),
+        client.get(f"/service-requests/{service_request.id}"),
+    ]
+
+    requests_after = repository.find_all()
+
+    assert all(response.status_code == 200 for response in responses)
+
+    assert [
+        (
+            item.id,
+            item.resident_id,
+            item.service_type,
+            item.description,
+            item.date_requested,
+            item.status,
+        )
+        for item in requests_before
+    ] == [
+        (
+            item.id,
+            item.resident_id,
+            item.service_type,
+            item.description,
+            item.date_requested,
+            item.status,
+        )
+        for item in requests_after
+    ]
+
+
+def test_deactivated_resident_cannot_submit_service_request(
+    client,
+    app,
+):
+    resident = create_resident(app)
+
+    resident_repository = ResidentRepository(
+        database_file=app.config["DATABASE"]
+    )
+    request_repository = get_request_repository(app)
+
+    # Deactivate the resident through the actual web route.
+    deactivation_response = client.post(
+        f"/residents/{resident.id}/deactivate"
+    )
+
+    assert deactivation_response.status_code == 302
+
+    # Confirm that the resident is now inactive.
+    deactivated_resident = resident_repository.find_by_id(
+        resident.id
+    )
+    assert deactivated_resident.status == "Inactive"
+
+    # Attempt to submit a request for the inactive resident.
+    submission_response = client.post(
+        "/service-requests/new",
+        data={
+            "resident_id": str(resident.id),
+            "service_type": "Medical Assistance",
+            "description": "Request for medical support",
+            "date_requested": "2026-11-11",
+        },
+    )
+
+    assert submission_response.status_code == 400
+    assert (
+        b"Service Requests can only be submitted for active Residents."
+        in submission_response.data
+    )
+
+    # Confirm that the rejected request was not saved.
+    assert request_repository.find_all() == []
+
+    # Confirm that the resident remains inactive.
+    unchanged_resident = resident_repository.find_by_id(
+        resident.id
+    )
+    assert unchanged_resident.status == "Inactive"
+
+
+def test_valid_leap_day_submission_is_saved(client, app):
+    resident = create_resident(app)
+
+    response = client.post(
+        "/service-requests/new",
+        data={
+            "resident_id": str(resident.id),
+            "service_type": "Medical Assistance",
+            "description": "Request submitted on a valid leap day",
+            "date_requested": "2024-02-29",
+        },
+    )
+
+    assert response.status_code == 302
+
+    repository = get_request_repository(app)
+    saved_requests = repository.find_all()
+
+    assert len(saved_requests) == 1
+    assert saved_requests[0].date_requested == "2024-02-29"
+    assert saved_requests[0].status == "Pending"
