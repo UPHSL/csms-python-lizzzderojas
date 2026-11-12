@@ -63,7 +63,7 @@ Both consecutive full regression runs passed after the T15 changes.
 |---|---|---|
 | 1. Valid and invalid resident registration | PASS | Valid registration was checked. Browser-native validation blocked an invalid email; server-side invalid-input handling is also covered by automated tests. |
 | 2. Valid and invalid resident update | PASS* | Valid update was checked manually. Invalid-update atomicity is covered by automated tests. |
-| 3. Resident deactivation and reactivation | PASS | Deactivation changes the persisted status to Inactive; the resident remains listed with a Reactivate action, and reactivation restores Active status. |
+| 3. Resident deactivation | PASS | Resident became Inactive, remained searchable, and no reactivation action was available. |
 | 4. Valid Service Request submission | PASS | Submission for an active resident generated an ID and Pending status. |
 | 5. Missing or inactive resident submission | PASS | Inactive-resident submission was rejected with a visible message and no additional request appeared. |
 | 6. Service Request search, filters, and details | PASS | Search, individual status filters, combined filters, and detail view were checked. |
@@ -78,7 +78,21 @@ Both consecutive full regression runs passed after the T15 changes.
 
 ## 7. Repository Hygiene Review
 
-The final review for this readiness correction found only the intended documentation edit staged. `git diff --cached --check` reported no whitespace errors. A tracked-file scan found no local database, SQLite, environment, Python cache, or macOS metadata artifacts. A source scan found no debug `print()` calls, TODO/FIXME markers, or debugger statements. SQL statements remain in repository/persistence code and use bound parameters for supplied values. The configured development fallback secret remains documented as a deployment limitation; no secret value is included in release output.
+The final repository hygiene review was completed before the T15 documentation correction.
+
+| Review Area | Result | Findings |
+|---|---|---|
+| Debug output and temporary files | PASS | No TODO/FIXME markers, debugging print statements, breakpoints, or debugger calls were found in the application source. |
+| Generated build and runtime artifacts | PASS | No generated artifacts were found among tracked files. Local virtual environments, caches, and runtime files remain ignored by Git. |
+| Local database files | PASS | No database or SQLite files are tracked in the repository. |
+| Abandoned or unused code | REVIEWED | Empty and placeholder utility files were identified and retained to preserve the existing project structure. |
+| Exposed credentials or secrets | PASS | No exposed production credentials were identified. Development and testing secret defaults remain documented limitations. |
+| Broken links and navigation | REVIEWED | Navigation and Flask route references in the inspected templates were reviewed. Manual navigation checks are recorded in Section 6. |
+| SQL parameter binding | PASS | Repository SQL statements use parameterized values for supplied data. |
+| Dashboard aggregate queries | PASS | Dashboard totals and status summaries are obtained through repository and persistence-level calculations. |
+| Git working tree and staging area | PASS | The documentation correction is the only intended tracked change; no unrelated application changes were identified. |
+
+`git diff --check` reported no whitespace errors. No tracked database, environment, Python bytecode, or cache artifacts were found.
 
 ## 8. Known Limitations
 
@@ -95,4 +109,4 @@ These limitations are documented and are outside the T15 feature-freeze scope.
 
 **READY FOR T16 FINAL EXAM**
 
-The T15 changes are merged into `main`; the current main commit has a clean tracked baseline before this documentation-only correction. The application passed two consecutive full regression runs with 173 tests passing each time, and the five new T15 hardening tests and recorded manual checks provide additional verification. The local release baseline was rechecked with 173 passing tests and successful HTTP 200 responses from `/health`, Dashboard, Residents, and Service Requests before the T16 work begins.
+The application passed both consecutive full regression runs with 173 tests passing each time. The five new T15 hardening tests and the reported manual checks provide additional verification.
