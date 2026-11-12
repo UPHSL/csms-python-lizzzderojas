@@ -2,48 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-    <title>{{ application_name }}</title>
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ application_name }} | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <main class="container">
-        <section class="card">
-            <p class="label">Programming Languages Laboratory</p>
-
-            <h1>{{ application_name }}</h1>
-
-            <p class="message">
-                Starter application initialized successfully.
-            </p>
-
-            <dl class="details">
-                <div>
-                    <dt>Current Sprint</dt>
-                    <dd>{{ current_sprint }}</dd>
-                </div>
-
-                <div>
-                    <dt>Technology</dt>
-                    <dd>Python with Flask</dd>
-                </div>
-
-                <div>
-                    <dt>Version</dt>
-                    <dd>{{ application_version }}</dd>
-                </div>
-            </dl>
-
-            <p class="status">
-                Environment status: Ready
-            </p>
-        </section>
-    </main>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading"><p class="breadcrumb">Community / Welcome</p><h1>{{ application_name }}</h1><p class="page-subtitle">A shared place to coordinate resident services and follow each request through completion.</p></div>
+                <div class="page-header-actions"><a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Open dashboard</a></div>
+            </header>
+            <section class="card landing-card">
+                <p class="card-description">Community Services Management System</p>
+                <h2>How can we help?</h2>
+                <p>Access resident records or review community service requests using the tools below.</p>
+                <div class="landing-actions"><a class="btn btn-primary" href="{{ url_for('main.resident_list') }}">Residents</a><a class="btn btn-secondary" href="{{ url_for('main.service_requests') }}">Service requests</a></div>
+                <div class="landing-meta"><span>Current sprint: {{ current_sprint }}</span><span>Version {{ application_version }}</span><span>Python with Flask</span></div>
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
 </body>
 </html>

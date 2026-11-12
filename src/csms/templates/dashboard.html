@@ -1,137 +1,62 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSMS Dashboard</title>
+    <title>Dashboard | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <main class="page-container">
-        <header class="page-header">
-            <div>
-                <p>Community Services Management System</p>
-                <h1>Dashboard</h1>
-                <p class="subtitle">
-                    Overview of Residents and Service Requests.
-                </p>
-            </div>
-
-            <nav class="main-navigation" aria-label="Main navigation">
-                <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('main.resident_list') }}">Residents</a>
-                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
-            </nav>
-        </header>
-
-        <section class="dashboard-section">
-            <h2>Resident Summary</h2>
-
-            <div class="dashboard-grid">
-                <article class="dashboard-card">
-                    <h3>Total Residents</h3>
-                    <p class="dashboard-number">{{ resident_stats.total }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Active Residents</h3>
-                    <p class="dashboard-number">{{ resident_stats.active }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Inactive Residents</h3>
-                    <p class="dashboard-number">{{ resident_stats.inactive }}</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="dashboard-section">
-            <h2>Service Request Summary</h2>
-
-            <div class="dashboard-grid">
-                <article class="dashboard-card">
-                    <h3>Total Service Requests</h3>
-                    <p class="dashboard-number">{{ service_request_stats.total }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Pending</h3>
-                    <p class="dashboard-number">{{ service_request_stats.pending }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>In Progress</h3>
-                    <p class="dashboard-number">{{ service_request_stats.in_progress }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Completed</h3>
-                    <p class="dashboard-number">{{ service_request_stats.completed }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Cancelled</h3>
-                    <p class="dashboard-number">{{ service_request_stats.cancelled }}</p>
-                </article>
-
-                <article class="dashboard-card">
-                    <h3>Open Service Requests</h3>
-                    <p class="dashboard-number">{{ service_request_stats.open }}</p>
-                    <p class="card-description">Pending + In Progress</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="card">
-            <div class="section-heading">
-                <h2>Recent Service Requests</h2>
-                <a href="{{ url_for('main.service_requests') }}">
-                    View All
-                </a>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Resident ID</th>
-                            <th>Service Type</th>
-                            <th>Date Requested</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for service_request in recent_requests %}
-                        <tr>
-                            <td>{{ service_request.id }}</td>
-                            <td>{{ service_request.resident_id }}</td>
-                            <td>{{ service_request.service_type }}</td>
-                            <td>{{ service_request.date_requested }}</td>
-                            <td>{{ service_request.status }}</td>
-                            <td>
-                                <a href="{{ url_for(
-                                    'main.service_request_detail',
-                                    service_request_id=service_request.id
-                                ) }}">
-                                    View
-                                </a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="empty-state">
-                                No Service Requests available.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading"><p class="breadcrumb">Home / Dashboard</p><h1>Dashboard</h1><p class="page-subtitle">A current overview of residents and service requests.</p></div>
+                <div class="page-header-actions"><a class="btn btn-primary" href="{{ url_for('main.new_service_request') }}">New service request</a></div>
+            </header>
+            <section aria-labelledby="resident-summary-heading">
+                <div class="section-heading"><h2 id="resident-summary-heading">Resident Summary</h2></div>
+                <div class="stat-grid" aria-label="Resident summary statistics">
+                    <article class="card stat-card"><p class="stat-label">Total Residents</p><p class="stat-value">{{ resident_stats.total }}</p></article>
+                    <article class="card stat-card"><p class="stat-label">Active Residents</p><p class="stat-value">{{ resident_stats.active }}</p></article>
+                    <article class="card stat-card"><p class="stat-label">Inactive Residents</p><p class="stat-value">{{ resident_stats.inactive }}</p></article>
+                </div>
+            </section>
+            <section aria-labelledby="request-summary-heading">
+                <div class="section-heading"><h2 id="request-summary-heading">Service Request Summary</h2></div>
+                <div class="status-summary">
+                    <div class="status-summary-item"><span class="badge badge-pending">Pending</span><strong>{{ service_request_stats.pending }}</strong></div>
+                    <div class="status-summary-item"><span class="badge badge-in-progress">In Progress</span><strong>{{ service_request_stats.in_progress }}</strong></div>
+                    <div class="status-summary-item"><span class="badge badge-completed">Completed</span><strong>{{ service_request_stats.completed }}</strong></div>
+                    <div class="status-summary-item"><span class="badge badge-cancelled">Cancelled</span><strong>{{ service_request_stats.cancelled }}</strong></div>
+                    <div class="status-summary-item"><span>Total Service Requests</span><strong>{{ service_request_stats.total }}</strong></div>
+                    <div class="status-summary-item"><span>Open Service Requests</span><strong>{{ service_request_stats.open }}</strong></div>
+                </div>
+            </section>
+            <section class="card" aria-labelledby="recent-requests-heading">
+                <div class="card-heading"><h2 id="recent-requests-heading">Recent service requests</h2><a class="table-action" href="{{ url_for('main.service_requests') }}">View all requests</a></div>
+                {% if recent_requests %}<div class="table-wrapper"><table class="table">
+                    <thead><tr><th scope="col">ID</th><th scope="col">Resident ID</th><th scope="col">Service type</th><th scope="col">Date requested</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+                    <tbody>{% for service_request in recent_requests %}<tr><td>{{ service_request.id }}</td><td>{{ service_request.resident_id }}</td><td class="wrap-cell">{{ service_request.service_type }}</td><td>{{ service_request.date_requested }}</td><td><span class="badge badge-{{ service_request.status|lower|replace(' ', '-') }}">{{ service_request.status }}</span></td><td><a class="table-action" href="{{ url_for('main.service_request_detail', service_request_id=service_request.id) }}">View details</a></td></tr>{% endfor %}</tbody>
+                </table></div>{% else %}<div class="empty-state"><h3>No Service Requests available.</h3><p>New service requests will appear here.</p></div>{% endif %}
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
 </body>
 </html>

@@ -1,94 +1,49 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Service Request</title>
+    <title>New Service Request | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <main class="page-container">
-        <header class="page-header">
-            <p>Community Services Management System</p>
-            <h1>New Service Request</h1>
-            <p>Submit a service request for an existing active resident.</p>
-
-            <nav>
-                <a href="{{ url_for('main.index') }}">Home</a> |
-                <a href="{{ url_for('main.resident_list') }}">Residents</a> |
-                <a href="{{ url_for('main.service_requests') }}">Service Requests</a>
-            </nav>
-        </header>
-
-        <section class="form-container">
-            <form method="POST">
-                <div class="form-group">
-                    <label for="resident_id">Resident ID</label>
-                    <input
-                        type="number"
-                        id="resident_id"
-                        name="resident_id"
-                        min="1"
-                        value="{{ values.get('resident_id', '') }}"
-                        required
-                    >
-                    {% if errors.get('resident_id') %}
-                        <p class="error-message">{{ errors.get('resident_id') }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="service_type">Service Type</label>
-                    <input
-                        type="text"
-                        id="service_type"
-                        name="service_type"
-                        value="{{ values.get('service_type', '') }}"
-                        required
-                    >
-                    {% if errors.get('service_type') %}
-                        <p class="error-message">{{ errors.get('service_type') }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        rows="5"
-                        required
-                    >{{ values.get('description', '') }}</textarea>
-                    {% if errors.get('description') %}
-                        <p class="error-message">{{ errors.get('description') }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="date_requested">Date Requested</label>
-                    <input
-                        type="date"
-                        id="date_requested"
-                        name="date_requested"
-                        value="{{ values.get('date_requested', '') }}"
-                        required
-                    >
-                    {% if errors.get('date_requested') %}
-                        <p class="error-message">{{ errors.get('date_requested') }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="button">
-                        Submit Service Request
-                    </button>
-                    <a href="{{ url_for('main.service_requests') }}" class="button secondary">
-                        Cancel
-                    </a>
-                </div>
-            </form>
-        </section>
-    </main>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading"><p class="breadcrumb"><a href="{{ url_for('main.service_requests') }}">Service Requests</a> / New request</p><h1>New service request</h1><p class="page-subtitle">Submit a request for an active resident.</p></div>
+                <div class="page-header-actions"><a class="btn btn-secondary" href="{{ url_for('main.service_requests') }}">Request list</a></div>
+            </header>
+            {% if errors %}<section class="card alert-card" aria-label="Form validation errors"><strong>Please review the highlighted information.</strong></section>{% endif %}
+            <section class="card" aria-labelledby="request-form-heading">
+                <div class="card-heading"><h2 id="request-form-heading">Request information</h2></div>
+                <form method="POST" action="{{ url_for('main.new_service_request') }}">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="resident_id">Resident</label><select id="resident_id" name="resident_id" required><option value="">Choose a resident</option>{% for resident in active_residents %}<option value="{{ resident.id }}" {% if values.get('resident_id')|int == resident.id %}selected{% endif %}>{{ resident.first_name }} {{ resident.last_name }} (ID {{ resident.id }})</option>{% endfor %}</select>{% if errors.get('resident_id') %}<p class="validation-message">{{ errors.get('resident_id') }}</p>{% endif %}</div>
+                        <div class="form-group"><label for="service_type">Service type</label><input type="text" id="service_type" name="service_type" value="{{ values.get('service_type', '') }}" required>{% if errors.get('service_type') %}<p class="validation-message">{{ errors.get('service_type') }}</p>{% endif %}</div>
+                        <div class="form-group full-width"><label for="description">Description</label><textarea id="description" name="description" rows="5" required>{{ values.get('description', '') }}</textarea>{% if errors.get('description') %}<p class="validation-message">{{ errors.get('description') }}</p>{% endif %}</div>
+                        <div class="form-group"><label for="date_requested">Date requested</label><input type="date" id="date_requested" name="date_requested" value="{{ values.get('date_requested', '') }}" required>{% if errors.get('date_requested') %}<p class="validation-message">{{ errors.get('date_requested') }}</p>{% endif %}</div>
+                    </div>
+                    <div class="form-actions"><a href="{{ url_for('main.service_requests') }}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary">Submit request</button></div>
+                </form>
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
 </body>
 </html>
