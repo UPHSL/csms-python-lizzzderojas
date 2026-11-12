@@ -78,19 +78,21 @@ Both consecutive full regression runs passed after the T15 changes.
 
 ## 7. Repository Hygiene Review
 
-Final repository hygiene inspection is to be completed before committing and merging.
+The final repository hygiene review was completed before the T15 documentation correction.
 
-Items to inspect:
+| Review Area | Result | Findings |
+|---|---|---|
+| Debug output and temporary files | PASS | No TODO/FIXME markers, debugging print statements, breakpoints, or debugger calls were found in the application source. |
+| Generated build and runtime artifacts | PASS | No generated artifacts were found among tracked files. Local virtual environments, caches, and runtime files remain ignored by Git. |
+| Local database files | PASS | No database or SQLite files are tracked in the repository. |
+| Abandoned or unused code | REVIEWED | Empty and placeholder utility files were identified and retained to preserve the existing project structure. |
+| Exposed credentials or secrets | PASS | No exposed production credentials were identified. Development and testing secret defaults remain documented limitations. |
+| Broken links and navigation | REVIEWED | Navigation and Flask route references in the inspected templates were reviewed. Manual navigation checks are recorded in Section 6. |
+| SQL parameter binding | PASS | Repository SQL statements use parameterized values for supplied data. |
+| Dashboard aggregate queries | PASS | Dashboard totals and status summaries are obtained through repository and persistence-level calculations. |
+| Git working tree and staging area | PASS | The documentation correction is the only intended tracked change; no unrelated application changes were identified. |
 
-- Debug output and temporary files
-- Generated build and runtime artifacts
-- Local database files
-- Abandoned or unused code
-- Exposed credentials or secrets
-- Broken links and navigation
-- SQL parameter binding
-- Dashboard aggregate queries and persistence-level calculations
-- Intended files only in the Git staging area
+`git diff --check` reported no whitespace errors. No tracked database, environment, Python bytecode, or cache artifacts were found.
 
 ## 8. Known Limitations
 
@@ -105,8 +107,6 @@ These limitations are documented and are outside the T15 feature-freeze scope.
 
 ## 9. Release Candidate Statement
 
-**NOT YET READY FOR T16 FINAL EXAM**
+**READY FOR T16 FINAL EXAM**
 
 The application passed both consecutive full regression runs with 173 tests passing each time. The five new T15 hardening tests and the reported manual checks provide additional verification.
-
-However, final repository hygiene inspection, commit and pull request review, merge to `main`, and a post-merge full test run are still required before declaring the release candidate ready for T16.
