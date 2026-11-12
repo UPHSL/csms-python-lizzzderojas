@@ -20,8 +20,26 @@ def test_health_endpoint_returns_ok(client: FlaskClient) -> None:
 
     assert response.status_code == 200
     assert payload is not None
+    assert payload["application"] == "CSMS"
+    assert payload["name"] == "Community Services Management System"
     assert payload["status"] == "ok"
-    assert payload["version"] == "0.1.0"
+    assert payload["version"] == "1.0.0"
+
+
+def test_release_version_is_visible_across_main_interfaces(client):
+    """The common release identity should be visible throughout the UI."""
+    for path in (
+        "/",
+        "/dashboard",
+        "/residents",
+        "/residents/register",
+        "/service-requests",
+        "/service-requests/new",
+    ):
+        response = client.get(path)
+
+        assert response.status_code == 200
+        assert b"v1.0.0" in response.data
 
 
 def test_unknown_page_returns_not_found(client: FlaskClient) -> None:
