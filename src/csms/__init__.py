@@ -34,4 +34,12 @@ def create_app(test_config: dict[str, object] | None = None) -> Flask:
 
     app.register_blueprint(main_blueprint)
 
+    @app.context_processor
+    def inject_release_version() -> dict[str, str]:
+        """Make the configured release identity available to all pages."""
+        return {
+            "application_name": app.config["APP_NAME"],
+            "application_version": app.config["APP_VERSION"],
+        }
+
     return app

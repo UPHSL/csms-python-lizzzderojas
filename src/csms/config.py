@@ -2,12 +2,14 @@
 
 import os
 
+from csms._version import __version__
+
 
 class BaseConfig:
     """Settings shared by all application environments."""
 
     APP_NAME = "Community Services Management System"
-    APP_VERSION = "0.1.0"
+    APP_VERSION = __version__
     CURRENT_SPRINT = "Sprint 0 - Developer Onboarding"
 
     SECRET_KEY = os.environ.get(
