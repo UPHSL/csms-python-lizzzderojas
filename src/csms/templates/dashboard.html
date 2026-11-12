@@ -54,7 +54,7 @@
                     <tbody>{% for service_request in recent_requests %}<tr><td>{{ service_request.id }}</td><td>{{ service_request.resident_id }}</td><td class="wrap-cell">{{ service_request.service_type }}</td><td>{{ service_request.date_requested }}</td><td><span class="badge badge-{{ service_request.status|lower|replace(' ', '-') }}">{{ service_request.status }}</span></td><td><a class="table-action" href="{{ url_for('main.service_request_detail', service_request_id=service_request.id) }}">View details</a></td></tr>{% endfor %}</tbody>
                 </table></div>{% else %}<div class="empty-state"><h3>No Service Requests available.</h3><p>New service requests will appear here.</p></div>{% endif %}
             </section>
-            <footer class="site-footer">Community Services Management System</footer>
+            <footer class="site-footer">{{ application_name }} <span aria-label="Version {{ application_version }}">v{{ application_version }}</span></footer>
         </main>
     </div>
 </div>

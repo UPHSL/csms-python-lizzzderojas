@@ -41,7 +41,7 @@
                     <div class="form-actions"><a href="{{ url_for('main.service_requests') }}" class="btn btn-secondary">Cancel</a><button type="submit" class="btn btn-primary">Submit request</button></div>
                 </form>
             </section>
-            <footer class="site-footer">Community Services Management System</footer>
+            <footer class="site-footer">{{ application_name }} <span aria-label="Version {{ application_version }}">v{{ application_version }}</span></footer>
         </main>
     </div>
 </div>
