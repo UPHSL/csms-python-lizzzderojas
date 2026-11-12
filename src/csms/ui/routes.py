@@ -1,6 +1,8 @@
 
 """Web routes for the CSMS user interface."""
 
+from datetime import date
+
 from flask import (
     Blueprint,
     abort,
@@ -31,6 +33,16 @@ from csms.services.service_request_query_service import (
 from csms.services.dashboard_service import DashboardService
 
 main_blueprint = Blueprint("main", __name__)
+
+
+def format_display_date(value):
+    """Return an ISO date in a compact human-readable format."""
+    try:
+        parsed_date = date.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return value
+
+    return f"{parsed_date.strftime('%b')} {parsed_date.day}, {parsed_date.year}"
 
 
 def get_resident_service():
@@ -241,6 +253,28 @@ def deactivate_resident(resident_id):
 
     return redirect(url_for("main.resident_list"))
 
+
+@main_blueprint.post("/residents/<int:resident_id>/reactivate")
+def reactivate_resident(resident_id):
+    """Reactivate an inactive Resident."""
+    repository = get_resident_service().repository
+    connection = repository.get_connection()
+
+    try:
+        cursor = connection.execute(
+            "UPDATE residents SET status = ? WHERE id = ?",
+            ("Active", resident_id),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    if cursor.rowcount == 0:
+        abort(404)
+
+    flash("Resident is active again.", "success")
+    return redirect(url_for("main.resident_list"))
+
 @main_blueprint.get("/service-requests")
 def service_requests():
     query = request.args.get("q", "")
@@ -254,15 +288,37 @@ def service_requests():
     except ValueError:
         abort(400)
 
+    residents = ResidentRepository(
+        database_file=current_app.config.get("DATABASE")
+    ).find_all()
+    resident_names = {
+        resident.id: f"{resident.first_name} {resident.last_name}"
+        for resident in residents
+    }
+    display_dates = {
+        service_request.id: format_display_date(
+            service_request.date_requested
+        )
+        for service_request in service_requests
+    }
+
     return render_template(
         "service_requests/list.html",
         service_requests=service_requests,
         query=query,
         selected_status=status,
+        resident_names=resident_names,
+        display_dates=display_dates,
     )
 
 @main_blueprint.route("/service-requests/new", methods=["GET", "POST"])
 def new_service_request():
+    residents = ResidentRepository(
+        database_file=current_app.config.get("DATABASE")
+    ).find_all()
+    active_residents = [
+        resident for resident in residents if resident.status == "Active"
+    ]
     values = {
         "resident_id": "",
         "service_type": "",
@@ -330,12 +386,14 @@ def new_service_request():
             "service_requests/form.html",
             values=values,
             errors=errors,
+            active_residents=active_residents,
         ), 400
 
     return render_template(
         "service_requests/form.html",
         values=values,
         errors=errors,
+        active_residents=active_residents,
     )
 
 @main_blueprint.get("/service-requests/<int:service_request_id>")
@@ -347,9 +405,15 @@ def service_request_detail(service_request_id):
     if service_request is None:
         abort(404)
 
+    related_resident = ResidentRepository(
+        database_file=current_app.config.get("DATABASE")
+    ).find_by_id(service_request.resident_id)
+
     return render_template(
         "service_requests/detail.html",
         service_request=service_request,
+        related_resident=related_resident,
+        display_date=format_display_date(service_request.date_requested),
     )
 
 @main_blueprint.post("/service-requests/<int:service_request_id>/status")

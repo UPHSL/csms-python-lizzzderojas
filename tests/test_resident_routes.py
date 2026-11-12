@@ -214,7 +214,7 @@ def test_deactivate_resident_changes_status_to_inactive(client, app):
     assert deactivated.status == "Inactive"
 
 
-def test_inactive_resident_remains_visible_without_deactivate_action(
+def test_inactive_resident_remains_visible_with_reactivate_action(
     client,
     app,
 ):
@@ -227,7 +227,8 @@ def test_inactive_resident_remains_visible_without_deactivate_action(
     assert response.status_code == 200
     assert b"Liz" in response.data
     assert b"Inactive" in response.data
-    assert b"No action available" in response.data
+    assert b"Reactivate" in response.data
+    assert b"No action available" not in response.data
 
 
 def test_get_deactivation_is_not_allowed(client, app):
