@@ -105,7 +105,8 @@ def health():
     """Return a simple application health response."""
     return jsonify(
         {
-            "application": current_app.config["APP_NAME"],
+            "application": "CSMS",
+            "name": current_app.config["APP_NAME"],
             "status": "ok",
             "version": current_app.config["APP_VERSION"],
         }
