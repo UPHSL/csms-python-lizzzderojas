@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading">
+                    <p class="breadcrumb"><a href="{{ url_for('main.resident_list') }}">Residents</a> / {{ 'Edit' if is_edit else 'Register' }}</p>
+                    <h1>{{ title }}</h1>
+                    <p class="page-subtitle">{% if is_edit %}Update the resident's information.{% else %}Enter contact and address details to register a resident.{% endif %}</p>
+                </div>
+                <div class="page-header-actions"><a class="btn btn-secondary" href="{{ url_for('main.resident_list') }}">Residents list</a></div>
+            </header>
+
+            {% if errors %}
+            <section class="card alert-card" aria-label="Form validation errors">
+                <strong>Please correct the following fields:</strong>
+                <ul>{% for error in errors %}<li>{% if error == 'first_name' %}First name is required.{% elif error == 'last_name' %}Last name is required.{% elif error == 'address' %}Address is required.{% elif error == 'contact_number' %}Enter a valid 11-digit mobile number starting with 09.{% elif error == 'email' %}Enter a valid email address.{% elif error == 'status' %}Invalid resident status.{% else %}{{ error }}{% endif %}</li>{% endfor %}</ul>
+            </section>
+            {% endif %}
+
+            <section class="card">
+                <div class="card-heading"><h2>Resident information</h2>{% if is_edit %}<span class="badge badge-{{ resident.status|lower|replace(' ', '-') }}">{{ resident.status }}</span>{% endif %}</div>
+                <form id="resident-form" method="POST" action="{{ form_action }}">
+                    {% if is_edit %}
+                    <div class="form-grid">
+                        <div class="form-group"><label for="resident_id">Resident ID</label><input type="text" id="resident_id" value="{{ resident.id }}" readonly></div>
+                        <div class="form-group"><label>Status</label><div class="status-field"><span class="badge badge-{{ resident.status|lower|replace(' ', '-') }}">{{ resident.status }}</span></div></div>
+                    </div>
+                    {% endif %}
+                    <div class="form-grid">
+                        <div class="form-group"><label for="first_name">First name</label><input type="text" id="first_name" name="first_name" value="{{ resident.first_name }}" required>{% if 'first_name' in errors %}<p class="validation-message">First name is required.</p>{% endif %}</div>
+                        <div class="form-group"><label for="last_name">Last name</label><input type="text" id="last_name" name="last_name" value="{{ resident.last_name }}" required>{% if 'last_name' in errors %}<p class="validation-message">Last name is required.</p>{% endif %}</div>
+                        <div class="form-group full-width"><label for="address">Address</label><textarea id="address" name="address" rows="3" required>{{ resident.address }}</textarea>{% if 'address' in errors %}<p class="validation-message">Address is required.</p>{% endif %}</div>
+                        <div class="form-group"><label for="contact_number">Contact number</label><input type="tel" id="contact_number" name="contact_number" value="{{ resident.contact_number }}" placeholder="09XXXXXXXXX" maxlength="11" required>{% if 'contact_number' in errors %}<p class="validation-message">Enter a valid 11-digit mobile number starting with 09.</p>{% endif %}</div>
+                        <div class="form-group"><label for="email">Email address</label><input type="email" id="email" name="email" value="{{ resident.email }}" required>{% if 'email' in errors %}<p class="validation-message">Enter a valid email address.</p>{% endif %}</div>
+                    </div>
+                    <div class="form-actions">
+                        <a class="btn btn-secondary" href="{{ url_for('main.resident_list') }}">Cancel</a>
+                        <button type="submit" class="btn btn-primary">{{ 'Save changes' if is_edit else 'Save resident' }}</button>
+                    </div>
+                </form>
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Requests | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading"><p class="breadcrumb">Home / Service Requests</p><h1>Service Request Management</h1><p class="page-subtitle">Search, review, and manage submitted service requests.</p></div>
+                <div class="page-header-actions"><a class="btn btn-primary" href="{{ url_for('main.new_service_request') }}">New service request</a></div>
+            </header>
+            <section class="card" aria-label="Search and filter requests">
+                <form method="GET" action="{{ url_for('main.service_requests') }}" class="toolbar">
+                    <div class="form-group"><label for="q">Search requests</label><input type="search" id="q" name="q" value="{{ query }}" placeholder="Service type or description"></div>
+                    <div class="form-group"><label for="status">Filter by status</label><select id="status" name="status"><option value="" {% if not selected_status %}selected{% endif %}>All statuses</option><option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option><option value="In Progress" {% if selected_status == 'In Progress' %}selected{% endif %}>In Progress</option><option value="Completed" {% if selected_status == 'Completed' %}selected{% endif %}>Completed</option><option value="Cancelled" {% if selected_status == 'Cancelled' %}selected{% endif %}>Cancelled</option></select></div>
+                    <div class="toolbar-actions"><button type="submit" class="btn btn-primary">Apply filters</button><a class="btn btn-secondary" href="{{ url_for('main.service_requests') }}">Clear</a></div>
+                </form>
+            </section>
+            <section class="card" aria-labelledby="request-results-heading">
+                <div class="card-heading"><h2 id="request-results-heading">Request results</h2><span class="record-count">{{ service_requests|length }} request(s)</span></div>
+                <div class="table-wrapper"><table class="table">
+                    <thead><tr><th scope="col">ID</th><th scope="col">Resident ID / Name</th><th scope="col">Service Type</th><th scope="col">Date Requested</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                    <tbody>{% for service_request in service_requests %}<tr>
+                        <td>{{ service_request.id }}</td><td>{{ service_request.resident_id }}<br><span class="cell-secondary">{{ resident_names.get(service_request.resident_id, 'Resident') }}</span></td>
+                        <td class="wrap-cell">{{ service_request.service_type }}</td><td>{{ display_dates.get(service_request.id, service_request.date_requested) }}</td>
+                        <td><span class="badge badge-{{ service_request.status|lower|replace(' ', '-') }}">{{ service_request.status }}</span></td>
+                        <td><a class="table-action" href="{{ url_for('main.service_request_detail', service_request_id=service_request.id) }}">View details</a></td>
+                    </tr>{% else %}<tr><td colspan="6" class="empty-state">No Service Requests found. Try changing the search terms or status filter.</td></tr>{% endfor %}</tbody>
+                </table></div>
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
+</body>
+</html>

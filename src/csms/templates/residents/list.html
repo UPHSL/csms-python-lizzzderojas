@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residents | Community Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">CS</span><span class="brand-name">Community Services</span></a>
+        <nav class="side-nav">
+            <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}"{% if request.endpoint == 'main.index' %} aria-current="page"{% endif %}>Home</a>
+            <a class="nav-link{% if request.endpoint == 'main.dashboard' %} active{% endif %}" href="{{ url_for('main.dashboard') }}"{% if request.endpoint == 'main.dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a class="nav-link{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} active{% endif %}" href="{{ url_for('main.resident_list') }}"{% if request.endpoint in ['main.resident_list', 'main.register_resident', 'main.edit_resident', 'main.deactivate_resident', 'main.reactivate_resident'] %} aria-current="page"{% endif %}>Residents</a>
+            <a class="nav-link{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} active{% endif %}" href="{{ url_for('main.service_requests') }}"{% if request.endpoint in ['main.service_requests', 'main.new_service_request', 'main.service_request_detail', 'main.update_service_request_status'] %} aria-current="page"{% endif %}>Service Requests</a>
+        </nav>
+        <div class="sidebar-footer">Community Services Management System</div>
+    </aside>
+    <div class="main-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-region" aria-live="polite">{% for category, message in messages %}<div class="flash-message flash-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}" role="status">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        <main class="page-container">
+            <header class="page-header">
+                <div class="page-heading"><p class="breadcrumb">Home / Residents</p><h1>Resident Management</h1><p class="page-subtitle">Manage resident records and contact information.</p></div>
+                <div class="page-header-actions"><a class="btn btn-primary" href="{{ url_for('main.register_resident') }}">Register resident</a></div>
+            </header>
+            <section class="card" aria-label="Search residents">
+                <form method="GET" action="{{ url_for('main.resident_list') }}" class="toolbar">
+                    <div class="form-group"><label for="q">Search residents</label><input type="search" id="q" name="q" value="{{ query }}" placeholder="Name"></div>
+                    <div class="toolbar-actions"><button type="submit" class="btn btn-primary">Search</button><a class="btn btn-secondary" href="{{ url_for('main.resident_list') }}">Clear</a></div>
+                </form>
+            </section>
+            <section class="card" aria-labelledby="resident-records-heading">
+                <div class="card-heading"><h2 id="resident-records-heading">Resident records</h2><span class="record-count">{{ residents|length }} record(s)</span></div>
+                {% if residents %}
+                <div class="table-wrapper"><table class="table">
+                    <thead><tr><th scope="col">ID</th><th scope="col">Full name</th><th scope="col">Address</th><th scope="col">Contact number</th><th scope="col">Email</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                    <tbody>
+                    {% for resident in residents|sort(attribute='id') %}
+                    <tr>
+                        <td>{{ resident.id }}</td><td>{{ resident.first_name }} {{ resident.last_name }}</td><td class="wrap-cell">{{ resident.address }}</td>
+                        <td>{% set phone = resident.contact_number|string %}{% if phone|length == 11 %}{{ phone[:4] }} {{ phone[4:7] }} {{ phone[7:] }}{% else %}{{ phone }}{% endif %}</td>
+                        <td class="wrap-cell">{{ resident.email }}</td><td><span class="badge badge-{{ resident.status|lower|replace(' ', '-') }}">{{ resident.status }}</span></td>
+                        <td><div class="actions"><a class="btn btn-secondary" href="{{ url_for('main.edit_resident', resident_id=resident.id) }}">Edit</a>
+                            {% if resident.status == 'Active' %}<form method="POST" action="{{ url_for('main.deactivate_resident', resident_id=resident.id) }}" onsubmit="return confirm('Deactivate this resident?');"><button type="submit" class="btn btn-danger-outline">Deactivate</button></form>
+                            {% else %}<form method="POST" action="{{ url_for('main.reactivate_resident', resident_id=resident.id) }}" onsubmit="return confirm('Reactivate this resident?');"><button type="submit" class="btn btn-secondary">Reactivate</button></form>{% endif %}
+                        </div></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table></div>
+                {% else %}<div class="empty-state"><h3>No residents found</h3><p>There are no resident records matching your search.</p></div>{% endif %}
+            </section>
+            <footer class="site-footer">Community Services Management System</footer>
+        </main>
+    </div>
+</div>
+</body>
+</html>
