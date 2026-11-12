@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "uphsl-csms-python"
-dynamic = ["version"]
+version = "0.1.0"
 description = "Python and Flask implementation of the Community Services Management System"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -28,9 +28,6 @@ csms = "csms.main:main"
 [tool.setuptools]
 package-dir = { "" = "src" }
 include-package-data = true
-
-[tool.setuptools.dynamic]
-version = { attr = "csms._version.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

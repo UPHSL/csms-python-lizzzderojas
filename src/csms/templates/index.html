@@ -33,9 +33,9 @@
                 <h2>How can we help?</h2>
                 <p>Access resident records or review community service requests using the tools below.</p>
                 <div class="landing-actions"><a class="btn btn-primary" href="{{ url_for('main.resident_list') }}">Residents</a><a class="btn btn-secondary" href="{{ url_for('main.service_requests') }}">Service requests</a></div>
-                <div class="landing-meta"><span>Current sprint: {{ current_sprint }}</span><span>Python with Flask</span></div>
+                <div class="landing-meta"><span>Current sprint: {{ current_sprint }}</span><span>Version {{ application_version }}</span><span>Python with Flask</span></div>
             </section>
-            <footer class="site-footer">{{ application_name }} <span aria-label="Version {{ application_version }}">v{{ application_version }}</span></footer>
+            <footer class="site-footer">Community Services Management System</footer>
         </main>
     </div>
 </div>
