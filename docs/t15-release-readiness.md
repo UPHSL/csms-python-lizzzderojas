@@ -63,7 +63,7 @@ Both consecutive full regression runs passed after the T15 changes.
 |---|---|---|
 | 1. Valid and invalid resident registration | PASS | Valid registration was checked. Browser-native validation blocked an invalid email; server-side invalid-input handling is also covered by automated tests. |
 | 2. Valid and invalid resident update | PASS* | Valid update was checked manually. Invalid-update atomicity is covered by automated tests. |
-| 3. Resident deactivation | PASS | Resident became Inactive, remained searchable, and no reactivation action was available. |
+| 3. Resident deactivation and reactivation | PASS | Deactivation changes the persisted status to Inactive; the resident remains listed with a Reactivate action, and reactivation restores Active status. |
 | 4. Valid Service Request submission | PASS | Submission for an active resident generated an ID and Pending status. |
 | 5. Missing or inactive resident submission | PASS | Inactive-resident submission was rejected with a visible message and no additional request appeared. |
 | 6. Service Request search, filters, and details | PASS | Search, individual status filters, combined filters, and detail view were checked. |
@@ -78,19 +78,7 @@ Both consecutive full regression runs passed after the T15 changes.
 
 ## 7. Repository Hygiene Review
 
-Final repository hygiene inspection is to be completed before committing and merging.
-
-Items to inspect:
-
-- Debug output and temporary files
-- Generated build and runtime artifacts
-- Local database files
-- Abandoned or unused code
-- Exposed credentials or secrets
-- Broken links and navigation
-- SQL parameter binding
-- Dashboard aggregate queries and persistence-level calculations
-- Intended files only in the Git staging area
+The final review for this readiness correction found only the intended documentation edit staged. `git diff --cached --check` reported no whitespace errors. A tracked-file scan found no local database, SQLite, environment, Python cache, or macOS metadata artifacts. A source scan found no debug `print()` calls, TODO/FIXME markers, or debugger statements. SQL statements remain in repository/persistence code and use bound parameters for supplied values. The configured development fallback secret remains documented as a deployment limitation; no secret value is included in release output.
 
 ## 8. Known Limitations
 
@@ -105,8 +93,6 @@ These limitations are documented and are outside the T15 feature-freeze scope.
 
 ## 9. Release Candidate Statement
 
-**NOT YET READY FOR T16 FINAL EXAM**
+**READY FOR T16 FINAL EXAM**
 
-The application passed both consecutive full regression runs with 173 tests passing each time. The five new T15 hardening tests and the reported manual checks provide additional verification.
-
-However, final repository hygiene inspection, commit and pull request review, merge to `main`, and a post-merge full test run are still required before declaring the release candidate ready for T16.
+The T15 changes are merged into `main`; the current main commit has a clean tracked baseline before this documentation-only correction. The application passed two consecutive full regression runs with 173 tests passing each time, and the five new T15 hardening tests and recorded manual checks provide additional verification. The local release baseline was rechecked with 173 passing tests and successful HTTP 200 responses from `/health`, Dashboard, Residents, and Service Requests before the T16 work begins.
